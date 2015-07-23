@@ -1,0 +1,140 @@
+<canvas id="myCanvas" width="250" height="350" style="border:1px solid #000000;"></canvas>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
+<script type="text/javascript">
+
+    var maxConn = 5;
+    var minConn = 2;
+
+    var max = 20;
+    var min = 1;
+
+    function gen()
+    {
+        ctx.clearRect(0, 0, c.width, c.height);
+
+        var count = _.random(minConn, maxConn);
+        var used = [];
+        for(var i=0; i < count; i++)
+        {
+            var from = randomRestricted(used);
+            used.push(from);
+            var to = randomRestricted(used);
+            used.push(to);
+
+            var color = colors.shift();
+            if(!draw(from, to, color))
+            {
+                i--;
+                colors.unshift(color);
+            }
+        }
+    }
+
+    function randomRestricted(restriction)
+    {
+        var rand = _.random(min, max);
+        if(_.indexOf(restriction, rand) > -1)
+        {
+            return randomRestricted(restriction);
+        }
+        return rand;
+    }
+
+    function draw(from, to, color)
+    {
+console.log(from, to);
+        ctx.beginPath();
+        ctx.strokeStyle = color;
+        ctx.moveTo(x(from), y(from));
+
+        if(x(from) == x(to) || y(from) == y(to))
+        {
+            if(x(from) == 0 || x(from) == width || y(from) == 0 || y(from) == height)
+            {
+                // over the border
+                return false;
+            }
+
+            //straight line
+            ctx.lineTo(x(to), y(to));
+            ctx.stroke();
+            ctx.closePath();
+            return true;
+        }
+
+console.log(x(from)+','+y(from)+' -> '+x(to)+','+y(to));
+        if( (x(from) == 0 || x(from) == width) && (x(to) == 0 || x(to) == width)
+            ||
+            (y(from) == 0 || y(from) == height) && (y(to) == 0 || y(to) == height)
+        )
+        {
+            //just keep diagonal
+            ctx.lineTo(x(to), y(to));
+            ctx.stroke();
+            ctx.closePath();
+            return true;
+        }
+
+        var xMid = _.first(_.without([x(from), x(to)], 0, width));
+        var yMid = _.first(_.without([y(from), y(to)], 0, height));
+
+        ctx.lineTo(xMid, yMid);
+
+        ctx.lineTo(x(to), y(to));
+        ctx.stroke();
+        ctx.closePath();
+        return true;
+    }
+
+    function x(of)
+    {
+        return points[of].x;
+    }
+
+    function y(of)
+    {
+        return points[of].y;
+    }
+
+    var c = document.getElementById("myCanvas");
+    var ctx = c.getContext("2d");
+    var width = 250;
+    var height = 350;
+
+    var points = {
+        1: {x: width / 5 * 1, y: 0},
+        2: {x: width / 5 * 2, y: 0},
+        3: {x: width / 5 * 3, y: 0},
+        4: {x: width / 5 * 4, y: 0},
+
+        5: {x: width, y: height / 7 * 1},
+        6: {x: width, y: height / 7 * 2},
+        7: {x: width, y: height / 7 * 3},
+        8: {x: width, y: height / 7 * 4},
+        9: {x: width, y: height / 7 * 5},
+        10: {x: width, y: height / 7 * 6},
+
+        11: {x: width / 5 * 4, y: height},
+        12: {x: width / 5 * 3, y: height},
+        13: {x: width / 5 * 2, y: height},
+        14: {x: width / 5 * 1, y: height},
+
+        15: {x: 0, y: height / 7 * 6},
+        16: {x: 0, y: height / 7 * 5},
+        17: {x: 0, y: height / 7 * 4},
+        18: {x: 0, y: height / 7 * 3},
+        19: {x: 0, y: height / 7 * 2},
+        20: {x: 0, y: height / 7 * 1}
+    };
+
+    var colors = ['#FF0000', '#00FF00', '#FFFF00', '#0000FF', '#000000'];
+
+    ctx.lineWidth = 5;
+
+    gen();
+
+</script>
+
+
+
