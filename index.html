@@ -85,7 +85,7 @@ function draw(ctx, from, to, color)
 
     if(x(from) == x(to) || y(from) == y(to))
     {
-        if (x(from) == 0 || x(from) == width || y(from) == 0 || y(from) == height)
+        if (x(from) == zeroBorder() || x(from) == widthBorder() || y(from) == zeroBorder() || y(from) == heightBorder())
         {
             // over the border
             return false;
@@ -109,9 +109,9 @@ function draw(ctx, from, to, color)
 
     if( _.random(1) == 1 // 50-50
             ||
-            (x(from) == 0 || x(from) == width) && (x(to) == 0 || x(to) == width)
+            (x(from) == zeroBorder() || x(from) == widthBorder()) && (x(to) == zeroBorder() || x(to) == widthBorder())
             ||
-            (y(from) == 0 || y(from) == height) && (y(to) == 0 || y(to) == height)
+            (y(from) == zeroBorder() || y(from) == heightBorder()) && (y(to) == zeroBorder() || y(to) == heightBorder())
             )
     {
         //just keep diagonal
@@ -123,8 +123,8 @@ function draw(ctx, from, to, color)
     }
 
     // orthogonal
-    var xMid = _.first(_.without([x(from), x(to)], 0, width));
-    var yMid = _.first(_.without([y(from), y(to)], 0, height));
+    var xMid = _.first(_.without([x(from), x(to)], zeroBorder(), widthBorder()));
+    var yMid = _.first(_.without([y(from), y(to)], zeroBorder(), heightBorder()));
 
     ctx.lineTo(xMid, yMid);
 
@@ -143,6 +143,21 @@ function x(of)
 function y(of)
 {
     return points[of].y;
+}
+
+function zeroBorder()
+{
+    return offset;
+}
+
+function widthBorder()
+{
+    return width - offset;
+}
+
+function heightBorder()
+{
+    return height - offset;
 }
 
 function moveItMoveIt(element)
@@ -195,71 +210,71 @@ var colors = ['#F44336', '#4CAF50', '#FFEB3B', '#3F51B5'];
 
 // 4 x 6
 //    var points = {
-//        1: {x: width / 5 * 1, y: 0},
-//        2: {x: width / 5 * 2, y: 0},
-//        3: {x: width / 5 * 3, y: 0},
-//        4: {x: width / 5 * 4, y: 0},
+//        1: {x: width / 5 * 1, y: zeroBorder()},
+//        2: {x: width / 5 * 2, y: zeroBorder()},
+//        3: {x: width / 5 * 3, y: zeroBorder()},
+//        4: {x: width / 5 * 4, y: zeroBorder()},
 //
-//        5: {x: width, y: height / 7 * 1},
-//        6: {x: width, y: height / 7 * 2},
-//        7: {x: width, y: height / 7 * 3},
-//        8: {x: width, y: height / 7 * 4},
-//        9: {x: width, y: height / 7 * 5},
-//        10: {x: width, y: height / 7 * 6},
+//        5: {x: widthBorder(), y: height / 7 * 1},
+//        6: {x: widthBorder(), y: height / 7 * 2},
+//        7: {x: widthBorder(), y: height / 7 * 3},
+//        8: {x: widthBorder(), y: height / 7 * 4},
+//        9: {x: widthBorder(), y: height / 7 * 5},
+//        10: {x: widthBorder(), y: height / 7 * 6},
 //
-//        11: {x: width / 5 * 4, y: height},
-//        12: {x: width / 5 * 3, y: height},
-//        13: {x: width / 5 * 2, y: height},
-//        14: {x: width / 5 * 1, y: height},
+//        11: {x: width / 5 * 4, y: heightBorder()},
+//        12: {x: width / 5 * 3, y: heightBorder()},
+//        13: {x: width / 5 * 2, y: heightBorder()},
+//        14: {x: width / 5 * 1, y: heightBorder()},
 //
-//        15: {x: 0, y: height / 7 * 6},
-//        16: {x: 0, y: height / 7 * 5},
-//        17: {x: 0, y: height / 7 * 4},
-//        18: {x: 0, y: height / 7 * 3},
-//        19: {x: 0, y: height / 7 * 2},
-//        20: {x: 0, y: height / 7 * 1}
+//        15: {x: zeroBorder(), y: height / 7 * 6},
+//        16: {x: zeroBorder(), y: height / 7 * 5},
+//        17: {x: zeroBorder(), y: height / 7 * 4},
+//        18: {x: zeroBorder(), y: height / 7 * 3},
+//        19: {x: zeroBorder(), y: height / 7 * 2},
+//        20: {x: zeroBorder(), y: height / 7 * 1}
 //    };
 
 // 4 x 4
 //    var points = {
-//        1: {x: width / 5 * 1, y: offset},
-//        2: {x: width / 5 * 2, y: 10},
-//        3: {x: width / 5 * 3, y: 10},
-//        4: {x: width / 5 * 4, y: 10},
+//        1: {x: width / 5 * 1, y: zeroBorder()},
+//        2: {x: width / 5 * 2, y: zeroBorder()},
+//        3: {x: width / 5 * 3, y: zeroBorder()},
+//        4: {x: width / 5 * 4, y: zeroBorder()},
 //
-//        5: {x: width - 10, y: height / 7 * 2},
-//        6: {x: width - 10, y: height / 7 * 3},
-//        7: {x: width - 10, y: height / 7 * 4},
-//        8: {x: width - 10, y: height / 7 * 5},
+//        5: {x: widthBorder(), y: height / 7 * 2},
+//        6: {x: widthBorder(), y: height / 7 * 3},
+//        7: {x: widthBorder(), y: height / 7 * 4},
+//        8: {x: widthBorder(), y: height / 7 * 5},
 //
-//        9: {x: width / 5 * 4, y: height - 10},
-//        10: {x: width / 5 * 3, y: height - 10},
-//        11: {x: width / 5 * 2, y: height - 10},
-//        12: {x: width / 5 * 1, y: height - 10},
+//        9: {x: width / 5 * 4, y: heightBorder()},
+//        10: {x: width / 5 * 3, y: heightBorder()},
+//        11: {x: width / 5 * 2, y: heightBorder()},
+//        12: {x: width / 5 * 1, y: heightBorder()},
 //
-//        13: {x: 10, y: height / 7 * 5},
-//        14: {x: 10, y: height / 7 * 4},
-//        15: {x: 10, y: height / 7 * 3},
-//        16: {x: 10, y: height / 7 * 2}
+//        13: {x: zeroBorder(), y: height / 7 * 5},
+//        14: {x: zeroBorder(), y: height / 7 * 4},
+//        15: {x: zeroBorder(), y: height / 7 * 3},
+//        16: {x: zeroBorder(), y: height / 7 * 2}
 //    };
 
 // 2 x 4
 var points = {
-    1: {x: width / 5 * 2, y: offset},
-    2: {x: width / 5 * 3, y: offset},
+    1: {x: width / 5 * 2, y: zeroBorder()},
+    2: {x: width / 5 * 3, y: zeroBorder()},
 
-    3: {x: width - offset, y: height / 7 * 2},
-    4: {x: width - offset, y: height / 7 * 3},
-    5: {x: width - offset, y: height / 7 * 4},
-    6: {x: width - offset, y: height / 7 * 5},
+    3: {x: widthBorder(), y: height / 7 * 2},
+    4: {x: widthBorder(), y: height / 7 * 3},
+    5: {x: widthBorder(), y: height / 7 * 4},
+    6: {x: widthBorder(), y: height / 7 * 5},
 
-    7: {x: width / 5 * 2, y: height - offset},
-    8: {x: width / 5 * 3, y: height - offset},
+    7: {x: width / 5 * 2, y: heightBorder()},
+    8: {x: width / 5 * 3, y: heightBorder()},
 
-    9: {x: offset, y: height / 7 * 5},
-    10: {x: offset, y: height / 7 * 4},
-    11: {x: offset, y: height / 7 * 3},
-    12: {x: offset, y: height / 7 * 2}
+    9: {x: zeroBorder(), y: height / 7 * 5},
+    10: {x: zeroBorder(), y: height / 7 * 4},
+    11: {x: zeroBorder(), y: height / 7 * 3},
+    12: {x: zeroBorder(), y: height / 7 * 2}
 };
 
 
