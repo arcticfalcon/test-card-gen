@@ -1,20 +1,31 @@
-<canvas id="myCanvas" width="250" height="350" style="border:1px solid #000000;"></canvas>
+<canvas width="250" height="350" style="border:1px solid #000000;"></canvas>
+<canvas width="250" height="350" style="border:1px solid #000000;"></canvas>
+<canvas width="250" height="350" style="border:1px solid #000000;"></canvas>
+<canvas width="250" height="350" style="border:1px solid #000000;"></canvas>
+<canvas width="250" height="350" style="border:1px solid #000000;"></canvas>
 
+
+<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.transit/0.9.12/jquery.transit.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/interact.js/1.2.4/interact.min.js"></script>
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
 <script type="text/javascript">
 
-    var maxConn = 5;
+    var maxConn = 4;
     var minConn = 2;
 
     var max = 20;
     var min = 1;
 
-    function gen()
+    function gen(ctx)
     {
-        ctx.clearRect(0, 0, c.width, c.height);
+        ctx.clearRect(0, 0, 250, 350);
+        ctx.lineWidth = 5;
 
         var count = _.random(minConn, maxConn);
         var used = [];
+        var mycolors = colors.slice();
+
         for(var i=0; i < count; i++)
         {
             var from = randomRestricted(used);
@@ -22,11 +33,11 @@
             var to = randomRestricted(used);
             used.push(to);
 
-            var color = colors.shift();
-            if(!draw(from, to, color))
+            var color = mycolors.splice(_.random(mycolors.length - 1), 1);
+            if(!draw(ctx, from, to, color))
             {
                 i--;
-                colors.unshift(color);
+                mycolors.unshift(color);
             }
         }
     }
@@ -41,9 +52,8 @@
         return rand;
     }
 
-    function draw(from, to, color)
+    function draw(ctx, from, to, color)
     {
-console.log(from, to);
         ctx.beginPath();
         ctx.strokeStyle = color;
         ctx.moveTo(x(from), y(from));
@@ -63,11 +73,11 @@ console.log(from, to);
             return true;
         }
 
-console.log(x(from)+','+y(from)+' -> '+x(to)+','+y(to));
+
         if( (x(from) == 0 || x(from) == width) && (x(to) == 0 || x(to) == width)
-            ||
-            (y(from) == 0 || y(from) == height) && (y(to) == 0 || y(to) == height)
-        )
+                ||
+                (y(from) == 0 || y(from) == height) && (y(to) == 0 || y(to) == height)
+                )
         {
             //just keep diagonal
             ctx.lineTo(x(to), y(to));
@@ -97,8 +107,42 @@ console.log(x(from)+','+y(from)+' -> '+x(to)+','+y(to));
         return points[of].y;
     }
 
-    var c = document.getElementById("myCanvas");
-    var ctx = c.getContext("2d");
+    function moveItMoveIt(element)
+    {
+        interact(element)
+                .draggable({
+//                snap: {
+//                    targets: [
+//                        interact.createSnapGrid({ x: 30, y: 30 })
+//                    ],
+//                    range: Infinity,
+//                    relativePoints: [ { x: 0, y: 0 } ]
+//                },
+                    inertia: false,
+                    restrict: {
+                        restriction: element.parentNode,
+                        elementRect: { top: 0, left: 0, bottom: 1, right: 1 },
+                        endOnly: true
+                    }
+                })
+                .on('dragmove', function (event) {
+
+//                $(event.target).transition({ translate: xPos + 'px, ' + yPos + 'px' }, 0, 'linear');
+                    $(event.target).transition({ x: '+=' + event.dx + 'px', y: '+=' + event.dy + 'px' }, 0, 'linear');
+                })
+                .on('tap', function (event) {
+
+                    $(event.target).transition({ x: '+=0px', y: '+=0px' }, 0, 'linear');
+
+                    $(event.currentTarget).transition({
+                        rotate: '+=90deg'
+                    });
+
+                    event.preventDefault();
+                });
+    }
+
+
     var width = 250;
     var height = 350;
 
@@ -128,11 +172,17 @@ console.log(x(from)+','+y(from)+' -> '+x(to)+','+y(to));
         20: {x: 0, y: height / 7 * 1}
     };
 
-    var colors = ['#FF0000', '#00FF00', '#FFFF00', '#0000FF', '#000000'];
+    var colors = ['#F44336', '#4CAF50', '#FFEB3B', '#3F51B5', '#9E9E9E'];
 
-    ctx.lineWidth = 5;
+    var canvases = $('canvas');
 
-    gen();
+    _(canvases).each(function(canvas){
+        var ctx = canvas.getContext("2d");
+        gen(ctx);
+        moveItMoveIt(canvas);
+    });
+
+
 
 </script>
 
