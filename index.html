@@ -1,8 +1,16 @@
-<canvas width="250" height="350" style="border:1px solid #000000;"></canvas>
-<canvas width="250" height="350" style="border:1px solid #000000;"></canvas>
-<canvas width="250" height="350" style="border:1px solid #000000;"></canvas>
-<canvas width="250" height="350" style="border:1px solid #000000;"></canvas>
-<canvas width="250" height="350" style="border:1px solid #000000;"></canvas>
+<canvas class="card" style="border:1px solid #ddd;"></canvas>
+<canvas class="card" style="border:1px solid #ddd;"></canvas>
+<canvas class="card" style="border:1px solid #ddd;"></canvas>
+<canvas class="card" style="border:1px solid #ddd;"></canvas>
+<canvas class="card" style="border:1px solid #ddd;"></canvas>
+<canvas class="card" style="border:1px solid #ddd;"></canvas>
+<canvas class="card" style="border:1px solid #ddd;"></canvas>
+<canvas class="card" style="border:1px solid #ddd;"></canvas>
+<canvas class="card" style="border:1px solid #ddd;"></canvas>
+<canvas class="card" style="border:1px solid #ddd;"></canvas>
+<canvas class="card" style="border:1px solid #ddd;"></canvas>
+<canvas class="card" style="border:1px solid #ddd;"></canvas>
+<canvas class="card" style="border:1px solid #ddd;"></canvas>
 
 
 <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
@@ -11,106 +19,136 @@
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
 <script type="text/javascript">
 
-    var maxConn = 4;
-    var minConn = 2;
+function gen(ctx)
+{
+    ctx.clearRect(0, 0, width, height);
+    ctx.lineWidth = lineWidth;
 
-    var max = 20;
-    var min = 1;
+    var count = _.random(minConn, maxConn);
+    var used = [];
+    var mycolors = colors.slice();
 
-    function gen(ctx)
+    for(var i=0; i < count; i++)
     {
-        ctx.clearRect(0, 0, 250, 350);
-        ctx.lineWidth = 5;
+        var from = randomRestricted(used);
+        used.push(from);
+        var to = randomRestricted(used);
+        used.push(to);
 
-        var count = _.random(minConn, maxConn);
-        var used = [];
-        var mycolors = colors.slice();
-
-        for(var i=0; i < count; i++)
+        var color = mycolors.splice(_.random(mycolors.length - 1), 1);
+        if(!draw(ctx, from, to, color))
         {
-            var from = randomRestricted(used);
-            used.push(from);
-            var to = randomRestricted(used);
-            used.push(to);
+            i--;
+            mycolors.unshift(color);
+        }
+    }
+}
 
-            var color = mycolors.splice(_.random(mycolors.length - 1), 1);
-            if(!draw(ctx, from, to, color))
-            {
-                i--;
-                mycolors.unshift(color);
-            }
+function randomRestricted(restriction)
+{
+    var rand = _.random(1, Object.keys(points).length);
+    if(_.indexOf(restriction, rand) > -1)
+    {
+        return randomRestricted(restriction);
+    }
+    return rand;
+}
+
+function drawEnds(ctx, from, to, color)
+{
+    ctx.lineWidth = circlelineWidth;
+    ctx.beginPath();
+    ctx.arc(x(from), y(from), circleRadius, 0, 2 * Math.PI, false);
+    ctx.fillStyle = 'white';
+    ctx.fill();
+    ctx.strokeStyle = 'black';
+    ctx.stroke();
+    ctx.closePath();
+
+    ctx.beginPath();
+    ctx.arc(x(to), y(to), circleRadius, 0, 2 * Math.PI, false);
+    ctx.fillStyle = 'white';
+    ctx.fill();
+    ctx.strokeStyle = 'black';
+    ctx.stroke();
+    ctx.closePath();
+}
+
+function draw(ctx, from, to, color)
+{
+//        var m = (y(to)-y(from)) / (x(to)-x(from));
+//        if(isFinite(m) && Math.abs(m) != 1 && Math.abs(m) != 0)
+//        {
+//            // not orthogonal nor 45 degree
+//            return false;
+//        }
+
+    if(x(from) == x(to) || y(from) == y(to))
+    {
+        if (x(from) == 0 || x(from) == width || y(from) == 0 || y(from) == height)
+        {
+            // over the border
+            return false;
         }
     }
 
-    function randomRestricted(restriction)
+    ctx.lineWidth = lineWidth;
+    ctx.beginPath();
+    ctx.strokeStyle = color;
+    ctx.moveTo(x(from), y(from));
+
+    if(x(from) == x(to) || y(from) == y(to))
     {
-        var rand = _.random(min, max);
-        if(_.indexOf(restriction, rand) > -1)
-        {
-            return randomRestricted(restriction);
-        }
-        return rand;
-    }
-
-    function draw(ctx, from, to, color)
-    {
-        ctx.beginPath();
-        ctx.strokeStyle = color;
-        ctx.moveTo(x(from), y(from));
-
-        if(x(from) == x(to) || y(from) == y(to))
-        {
-            if(x(from) == 0 || x(from) == width || y(from) == 0 || y(from) == height)
-            {
-                // over the border
-                return false;
-            }
-
-            //straight line
-            ctx.lineTo(x(to), y(to));
-            ctx.stroke();
-            ctx.closePath();
-            return true;
-        }
-
-
-        if( (x(from) == 0 || x(from) == width) && (x(to) == 0 || x(to) == width)
-                ||
-                (y(from) == 0 || y(from) == height) && (y(to) == 0 || y(to) == height)
-                )
-        {
-            //just keep diagonal
-            ctx.lineTo(x(to), y(to));
-            ctx.stroke();
-            ctx.closePath();
-            return true;
-        }
-
-        var xMid = _.first(_.without([x(from), x(to)], 0, width));
-        var yMid = _.first(_.without([y(from), y(to)], 0, height));
-
-        ctx.lineTo(xMid, yMid);
-
+        //straight line
         ctx.lineTo(x(to), y(to));
         ctx.stroke();
         ctx.closePath();
+        drawEnds(ctx, from, to, color);
         return true;
     }
 
-    function x(of)
+    if( _.random(1) == 1 // 50-50
+            ||
+            (x(from) == 0 || x(from) == width) && (x(to) == 0 || x(to) == width)
+            ||
+            (y(from) == 0 || y(from) == height) && (y(to) == 0 || y(to) == height)
+            )
     {
-        return points[of].x;
+        //just keep diagonal
+        ctx.lineTo(x(to), y(to));
+        ctx.stroke();
+        ctx.closePath();
+        drawEnds(ctx, from, to, color);
+        return true;
     }
 
-    function y(of)
-    {
-        return points[of].y;
-    }
+    // orthogonal
+    var xMid = _.first(_.without([x(from), x(to)], 0, width));
+    var yMid = _.first(_.without([y(from), y(to)], 0, height));
 
-    function moveItMoveIt(element)
-    {
-        interact(element)
-                .draggable({
+    ctx.lineTo(xMid, yMid);
+
+    ctx.lineTo(x(to), y(to));
+    ctx.stroke();
+    ctx.closePath();
+    drawEnds(ctx, from, to, color);
+    return true;
+}
+
+function x(of)
+{
+    return points[of].x;
+}
+
+function y(of)
+{
+    return points[of].y;
+}
+
+function moveItMoveIt(element)
+{
+    interact(element)
+            .draggable({
 //                snap: {
 //                    targets: [
 //                        interact.createSnapGrid({ x: 30, y: 30 })
@@ -118,71 +156,123 @@
 //                    range: Infinity,
 //                    relativePoints: [ { x: 0, y: 0 } ]
 //                },
-                    inertia: false,
-                    restrict: {
-                        restriction: element.parentNode,
-                        elementRect: { top: 0, left: 0, bottom: 1, right: 1 },
-                        endOnly: true
-                    }
-                })
-                .on('dragmove', function (event) {
+                inertia: false,
+                restrict: {
+                    restriction: element.parentNode,
+                    elementRect: { top: 0, left: 0, bottom: 1, right: 1 },
+                    endOnly: true
+                }
+            })
+            .on('dragmove', function (event) {
 
 //                $(event.target).transition({ translate: xPos + 'px, ' + yPos + 'px' }, 0, 'linear');
-                    $(event.target).transition({ x: '+=' + event.dx + 'px', y: '+=' + event.dy + 'px' }, 0, 'linear');
-                })
-                .on('tap', function (event) {
+                $(event.target).transition({ x: '+=' + event.dx + 'px', y: '+=' + event.dy + 'px' }, 0, 'linear');
+            })
+            .on('tap', function (event) {
 
-                    $(event.target).transition({ x: '+=0px', y: '+=0px' }, 0, 'linear');
+                $(event.target).transition({ x: '+=0px', y: '+=0px' }, 0, 'linear');
 
-                    $(event.currentTarget).transition({
-                        rotate: '+=90deg'
-                    });
-
-                    event.preventDefault();
+                $(event.currentTarget).transition({
+                    rotate: '+=90deg'
                 });
-    }
+
+                event.preventDefault();
+            });
+}
 
 
-    var width = 250;
-    var height = 350;
+var width = 175;
+var height = width * 1.4;
+var offset = 10;
+var lineWidth = 3;
+var circlelineWidth = 2;
+var circleRadius = 5;
 
-    var points = {
-        1: {x: width / 5 * 1, y: 0},
-        2: {x: width / 5 * 2, y: 0},
-        3: {x: width / 5 * 3, y: 0},
-        4: {x: width / 5 * 4, y: 0},
+var maxConn = 3;
+var minConn = 1;
+//    var colors = ['#F44336', '#4CAF50', '#FFEB3B', '#3F51B5', '#9E9E9E'];
+var colors = ['#F44336', '#4CAF50', '#FFEB3B', '#3F51B5'];
 
-        5: {x: width, y: height / 7 * 1},
-        6: {x: width, y: height / 7 * 2},
-        7: {x: width, y: height / 7 * 3},
-        8: {x: width, y: height / 7 * 4},
-        9: {x: width, y: height / 7 * 5},
-        10: {x: width, y: height / 7 * 6},
+// 4 x 6
+//    var points = {
+//        1: {x: width / 5 * 1, y: 0},
+//        2: {x: width / 5 * 2, y: 0},
+//        3: {x: width / 5 * 3, y: 0},
+//        4: {x: width / 5 * 4, y: 0},
+//
+//        5: {x: width, y: height / 7 * 1},
+//        6: {x: width, y: height / 7 * 2},
+//        7: {x: width, y: height / 7 * 3},
+//        8: {x: width, y: height / 7 * 4},
+//        9: {x: width, y: height / 7 * 5},
+//        10: {x: width, y: height / 7 * 6},
+//
+//        11: {x: width / 5 * 4, y: height},
+//        12: {x: width / 5 * 3, y: height},
+//        13: {x: width / 5 * 2, y: height},
+//        14: {x: width / 5 * 1, y: height},
+//
+//        15: {x: 0, y: height / 7 * 6},
+//        16: {x: 0, y: height / 7 * 5},
+//        17: {x: 0, y: height / 7 * 4},
+//        18: {x: 0, y: height / 7 * 3},
+//        19: {x: 0, y: height / 7 * 2},
+//        20: {x: 0, y: height / 7 * 1}
+//    };
 
-        11: {x: width / 5 * 4, y: height},
-        12: {x: width / 5 * 3, y: height},
-        13: {x: width / 5 * 2, y: height},
-        14: {x: width / 5 * 1, y: height},
+// 4 x 4
+//    var points = {
+//        1: {x: width / 5 * 1, y: offset},
+//        2: {x: width / 5 * 2, y: 10},
+//        3: {x: width / 5 * 3, y: 10},
+//        4: {x: width / 5 * 4, y: 10},
+//
+//        5: {x: width - 10, y: height / 7 * 2},
+//        6: {x: width - 10, y: height / 7 * 3},
+//        7: {x: width - 10, y: height / 7 * 4},
+//        8: {x: width - 10, y: height / 7 * 5},
+//
+//        9: {x: width / 5 * 4, y: height - 10},
+//        10: {x: width / 5 * 3, y: height - 10},
+//        11: {x: width / 5 * 2, y: height - 10},
+//        12: {x: width / 5 * 1, y: height - 10},
+//
+//        13: {x: 10, y: height / 7 * 5},
+//        14: {x: 10, y: height / 7 * 4},
+//        15: {x: 10, y: height / 7 * 3},
+//        16: {x: 10, y: height / 7 * 2}
+//    };
 
-        15: {x: 0, y: height / 7 * 6},
-        16: {x: 0, y: height / 7 * 5},
-        17: {x: 0, y: height / 7 * 4},
-        18: {x: 0, y: height / 7 * 3},
-        19: {x: 0, y: height / 7 * 2},
-        20: {x: 0, y: height / 7 * 1}
-    };
+// 2 x 4
+var points = {
+    1: {x: width / 5 * 2, y: offset},
+    2: {x: width / 5 * 3, y: offset},
 
-    var colors = ['#F44336', '#4CAF50', '#FFEB3B', '#3F51B5', '#9E9E9E'];
+    3: {x: width - offset, y: height / 7 * 2},
+    4: {x: width - offset, y: height / 7 * 3},
+    5: {x: width - offset, y: height / 7 * 4},
+    6: {x: width - offset, y: height / 7 * 5},
 
-    var canvases = $('canvas');
+    7: {x: width / 5 * 2, y: height - offset},
+    8: {x: width / 5 * 3, y: height - offset},
 
-    _(canvases).each(function(canvas){
-        var ctx = canvas.getContext("2d");
-        gen(ctx);
-        moveItMoveIt(canvas);
-    });
+    9: {x: offset, y: height / 7 * 5},
+    10: {x: offset, y: height / 7 * 4},
+    11: {x: offset, y: height / 7 * 3},
+    12: {x: offset, y: height / 7 * 2}
+};
 
 
+
+var canvases = $('canvas.card');
+
+_(canvases).each(function(canvas){
+    canvas.width = width;
+    canvas.height = height;
+    var ctx = canvas.getContext("2d");
+    gen(ctx);
+    moveItMoveIt(canvas);
+});
 
 </script>
 
